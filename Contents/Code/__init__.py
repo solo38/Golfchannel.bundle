@@ -28,8 +28,7 @@ def ShowList():
 		oc.add(DirectoryObject(
 			key = Callback(GetVideos,url=url,show=title),
 			title = title, 
-			#thumb = Resource.ContentsOfURLWithFallback(thumb),
-			thumb = thumb,
+			thumb = Resource.ContentsOfURLWithFallback(thumb),
 			summary=summary
 			
 		))
@@ -53,8 +52,7 @@ def GetVideos(url, show):
 			oc.add(VideoClipObject(
 				url = url,
 				title = title,
-				#thumb = Resource.ContentsOfURLWithFallback(thumb)
-				thumb = thumb
+				thumb = Resource.ContentsOfURLWithFallback(thumb)
 			))
 		except:
 			continue
