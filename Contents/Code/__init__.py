@@ -1,4 +1,4 @@
-NAME="Golf Channel"
+NAME = "Golf Channel"
 DEFAULT_THUMB = "http://resources-cdn.plexapp.com/image/source/com.plexapp.plugins.golfchannel.jpg"
 
 ####################################################################################################
@@ -12,10 +12,10 @@ def Start():
 def MainMenu():
         oc = ObjectContainer()
         
-        oc.add(DirectoryObject(key=Callback(FeaturedShows), title="Featured Shows", thumb=DEFAULT_THUMB, summary="Shows currently featured on golfchannel website.  May or may not have full episodes."))
-        oc.add(DirectoryObject(key=Callback(FullEpisodes), title="Shows With Full Episodes", thumb=DEFAULT_THUMB, summary="Shows listed as having full episodes on golfchannel site."))
-        oc.add(DirectoryObject(key=Callback(FeaturedVideos), title="Featured Videos", thumb=DEFAULT_THUMB, summary="Videos featured on the golfchannel website."))
-        oc.add(DirectoryObject(key=Callback(LatestVideos, start=0), title="Latest Videos", thumb=DEFAULT_THUMB, summary="Latest videos posted on the golfchannel website."))
+        oc.add(DirectoryObject(key=Callback(FeaturedShows), title="Featured Shows", thumb=DEFAULT_THUMB, summary="Shows currently featured on Golf Channel website.  May or may not have full episodes."))
+        oc.add(DirectoryObject(key=Callback(FullEpisodes), title="Shows With Full Episodes", thumb=DEFAULT_THUMB, summary="Shows listed as having full episodes on Golf Channel site."))
+        oc.add(DirectoryObject(key=Callback(FeaturedVideos), title="Featured Videos", thumb=DEFAULT_THUMB, summary="Videos featured on the Golf Channel website."))
+        oc.add(DirectoryObject(key=Callback(LatestVideos, start=0), title="Latest Videos", thumb=DEFAULT_THUMB, summary="Latest videos posted on the Golf Channel website."))
         
         return oc
 
