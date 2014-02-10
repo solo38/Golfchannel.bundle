@@ -144,7 +144,6 @@ def LatestVideos(start=0):
 def GetVideos(url, show):
 	oc = ObjectContainer()
 	oc.title2 = show
-	Log.Debug("--> Show: %s" % show)
 	
 	page = HTML.ElementFromURL(url)
 	for show in page.xpath("//div[contains(@class,'pane-gfc-tv-shows-individual-carrousels')]//li[contains(@class,'views-row')]//div[contains(@class,'views-field-title')]//a"):		
