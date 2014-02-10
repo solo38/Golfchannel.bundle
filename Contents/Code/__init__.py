@@ -12,7 +12,8 @@ def Start():
 def MainMenu():
         oc = ObjectContainer()
         
-        oc.add(DirectoryObject(key=Callback(FeaturedShows), title="Featured Shows", thumb=DEFAULT_THUMB, summary="Shows currently featured on Golf Channel website.  May or may not have full episodes."))
+        # See not below as to why this is commented but should stay for now -- Gerk , Feb 9, 2014
+        # oc.add(DirectoryObject(key=Callback(FeaturedShows), title="Featured Shows", thumb=DEFAULT_THUMB, summary="Shows currently featured on Gold Channel website.  May or may not have full episodes."))
         oc.add(DirectoryObject(key=Callback(FullEpisodes), title="Shows With Full Episodes", thumb=DEFAULT_THUMB, summary="Shows listed as having full episodes on Golf Channel site."))
         oc.add(DirectoryObject(key=Callback(FeaturedVideos), title="Featured Videos", thumb=DEFAULT_THUMB, summary="Videos featured on the Golf Channel website."))
         oc.add(DirectoryObject(key=Callback(LatestVideos, start=0), title="Latest Videos", thumb=DEFAULT_THUMB, summary="Latest videos posted on the Golf Channel website."))
@@ -23,44 +24,70 @@ def MainMenu():
 @route("/video/golfchannel/fullepisodes")
 def FullEpisodes():
 	oc = ObjectContainer()
+	oc.title2 = "Full Episodes"
 	
-	page = HTML.ElementFromURL("http://www.golfchannel.com")
+	page = HTML.ElementFromURL("http://www.golfchannel.com/tv/#allShowsSec")
 	
-	for show in page.xpath("//h2[contains(.,'Full Episodes') or contains(.,'More full episodes')]/following-sibling::div//li/a"):
-		title = show.xpath("./text()")[0]
-		url = "http://www.golfchannel.com%s" % show.xpath("./@href")[0]
+	for show in page.xpath("//div[contains(@class,'view-display-id-all_golf_channel_full_episodes')]//div[contains(@class,'views-field-title')]"):
+		title = show.xpath(".//a/text()")[0]
+		
+		
+		if show.xpath(".//a/@href")[0].startswith("http://"):
+			url = show.xpath(".//a/@href")[0]
+		else:
+			url = "http://www.golfchannel.com%s" % show.xpath(".//a/@href")[0]
+		
+		thumb = show.xpath("..//img/@src")[0]
+		summary = show.xpath("../div[contains(@class,'views-field-body')]//div[contains(@class,'field-content')]/text()")[0]
 
 		oc.add(DirectoryObject(
 			key = Callback(GetVideos,url=url,show=title),
-			title = title, 
-			thumb = DEFAULT_THUMB
+			title = title,
+			#thumb = Resource.ContentsOfURLWithFallback(thumb),
+			thumb = thumb,
+			summary = summary
 		))
 		
 	return oc
 
 ####################################################################################################
-@route("/video/golfchannel/featuredshows")
-def FeaturedShows():
-	oc = ObjectContainer()
-	
-	page = HTML.ElementFromURL("http://www.golfchannel.com")
-	
-	for show in page.xpath("//h2[contains(.,'Featured Shows')]/following-sibling::div//li/a"):
-		title = show.xpath("./text()")[0]
-		url = "http://www.golfchannel.com%s" % show.xpath("./@href")[0]
-		
-		oc.add(DirectoryObject(
-			key = Callback(GetVideos,url=url,show=title),
-			title = title, 
-			thumb = DEFAULT_THUMB
-		))
-		
-	return oc
+# Until they put some sensible data on this page we're going to keep this commented out for now
+# currently the data doesn't even give us show titles and to extrapolate from the URL is not a great
+# approach, but let's leave this here in case they get it figured out -- Gerk, Feb 9, 2014
+# @route("/video/golfchannel/featuredshows")
+# def FeaturedShows():
+# 	oc = ObjectContainer()
+#	oc.title2 = "Featured Shows"
+# 	
+# 	page = HTML.ElementFromURL("http://www.golfchannel.com/tv/#allShowsSec")
+# 	
+# 	for show in page.xpath("//div[contains(@class,'view-display-id-all_golf_channel_tv_shows')]//div[contains(@class,'views-field-title')]"):
+# 		title = show.xpath(".//a/text()")[0]
+# 		
+# 		
+# 		if show.xpath(".//a/@href")[0].startswith("http://"):
+# 			url = show.xpath(".//a/@href")[0]
+# 		else:
+# 			url = "http://www.golfchannel.com%s" % show.xpath(".//a/@href")[0]
+# 		
+# 		thumb = show.xpath("..//img/@src")[0]
+# 		summary = show.xpath("../div[contains(@class,'views-field-field-schedule')]//div[contains(@class,'field-content')]/text()")[0]
+# 
+# 		oc.add(DirectoryObject(
+# 			key = Callback(GetVideos,url=url,show=title),
+# 			title = title, 
+#			#thumb = Resource.ContentsOfURLWithFallback(thumb)
+# 			thumb = thumb,
+# 			summary = summary
+# 		))
+# 		
+# 	return oc
 
 ####################################################################################################
 @route("/video/golfchannel/featuredvideos")
 def FeaturedVideos():
 	oc = ObjectContainer()
+	oc.title2 = "Featured Videos"
 
 	page = HTML.ElementFromURL("http://www.golfchannel.com/media")
 	for show in page.xpath("//div[contains(@class,'featured-video-photos')]//div[contains(@class,'views-row')]"):		
@@ -74,7 +101,7 @@ def FeaturedVideos():
 			oc.add(VideoClipObject(
 				url = url,
 				title = title,
-				#thumb = Resource.ContentsOfURLWithFallback(thumb)
+				#thumb = Resource.ContentsOfURLWithFallback(thumb),
 				thumb = thumb
 			))
 		except:
@@ -86,6 +113,7 @@ def FeaturedVideos():
 @route("/video/golfchannel/latestvideos", start=int)
 def LatestVideos(start=0):
 	oc = ObjectContainer()
+	oc.title2 = "Latest Videos"
 	
 	page = HTML.ElementFromURL("http://www.golfchannel.com/search/?&q=&submitSearch=+&mediatype=Video&start=%i" % start)
 	
@@ -100,6 +128,7 @@ def LatestVideos(start=0):
 		oc.add(VideoClipObject(
 			url = url,
 			title = title,
+			#thumb = Resource.ContentsOfURLWithFallback(thumb),
 			thumb = thumb, 
 			summary = summary, 
 			originally_available_at = originally_available_at
@@ -114,6 +143,8 @@ def LatestVideos(start=0):
 @route("/video/golfchannel/getvideos")
 def GetVideos(url, show):
 	oc = ObjectContainer()
+	oc.title2 = show
+	Log.Debug("--> Show: %s" % show)
 	
 	page = HTML.ElementFromURL(url)
 	for show in page.xpath("//div[contains(@class,'pane-gfc-tv-shows-individual-carrousels')]//li[contains(@class,'views-row')]//div[contains(@class,'views-field-title')]//a"):		
