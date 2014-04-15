@@ -17,7 +17,7 @@ def MainMenu():
         oc.add(DirectoryObject(key=Callback(FullEpisodes), title="Shows With Full Episodes", thumb=DEFAULT_THUMB, summary="Shows listed as having full episodes on Golf Channel site."))
         oc.add(DirectoryObject(key=Callback(FeaturedVideos), title="Featured Videos", thumb=DEFAULT_THUMB, summary="Videos featured on the Golf Channel website."))
         oc.add(DirectoryObject(key=Callback(LatestVideos, start=0), title="Latest Videos", thumb=DEFAULT_THUMB, summary="Latest videos posted on the Golf Channel website."))
-        
+        oc.add(InputDirectoryObject(key = Callback(Search), title="Search Golfchannel Videos", prompt="Search Videos"))
         return oc
 
 ####################################################################################################
@@ -115,12 +115,12 @@ def LatestVideos(start=0):
 	oc = ObjectContainer()
 	oc.title2 = "Latest Videos"
 	
-	page = HTML.ElementFromURL("http://www.golfchannel.com/search/?&q=&submitSearch=+&mediatype=Video&start=%i" % start)
+	page = HTML.ElementFromURL("http://www.golfchannel.com/search/?&q=&submitSearch=&mediatype=Video&start=%i" % start)
 	
 	for video in page.xpath("//li[contains(@class,'ez-Video')]"):
 		Log(video)
 		thumb = video.xpath(".//img/@src")[0]
-		title = video.xpath(".//div[contains(@class,'ez-main')]/a/text()")[0]
+		title = video.xpath("string(.//div[contains(@class,'ez-main')]/a)")
 		url = video.xpath(".//div[contains(@class,'ez-main')]/a/@href")[0]
 		summary = video.xpath(".//p[contains(@class,'ez-desc')]/text()")[0]
 		originally_available_at = Datetime.ParseDate(video.xpath(".//p[contains(@class,'ez-date')]/text()")[0]).date()
@@ -162,4 +162,35 @@ def GetVideos(url, show):
 			))
 		except:
 			continue
+	return oc
+
+####################################################################################################
+@route("/video/golfchannel/search")
+def Search(query="golf"):
+	Log.Debug("Search Query: "+query)
+	return SearchVideos(query)
+	
+####################################################################################################
+@route("/video/golfchannel/searchvideos")
+def SearchVideos(query):
+	oc = ObjectContainer()
+	oc.title2 = "Search Golfchannel Videos"
+	
+	page = HTML.ElementFromURL("http://www.golfchannel.com/search/?&q=%s&submitSearch=+&mediatype=Video" % String.Quote(query, usePlus = True))
+	
+	for video in page.xpath("//li[contains(@class,'ez-Video')]"):
+		thumb = video.xpath(".//img/@src")[0]
+		title = video.xpath("string(.//div[contains(@class,'ez-main')]/a)")
+		url = video.xpath(".//div[contains(@class,'ez-main')]/a/@href")[0]
+		summary = video.xpath(".//p[contains(@class,'ez-desc')]/text()")[0]
+		originally_available_at = Datetime.ParseDate(video.xpath(".//p[contains(@class,'ez-date')]/text()")[0]).date()
+
+		oc.add(VideoClipObject(
+			url = url,
+			title = title,
+			thumb = thumb, 
+			summary = summary, 
+			originally_available_at = originally_available_at
+		))
+
 	return oc

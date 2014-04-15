@@ -1,0 +1,26 @@
+def Search(query="golf"):
+	return SearchVideos(query)
+	
+####################################################################################################
+def SearchVideos(query):
+	oc = ObjectContainer()
+	oc.title2 = "Search Golfchannel Videos"
+	
+	page = HTML.ElementFromURL("http://www.golfchannel.com/search/?&q=%s&submitSearch=&mediatype=Video" % String.Quote(query, usePlus = True))
+	
+	for video in page.xpath("//li[contains(@class,'ez-Video')]"):
+		thumb = video.xpath(".//img/@src")[0]
+		title = video.xpath("string(.//div[contains(@class,'ez-main')]/a)")
+		url = video.xpath(".//div[contains(@class,'ez-main')]/a/@href")[0]
+		summary = video.xpath(".//p[contains(@class,'ez-desc')]/text()")[0]
+		originally_available_at = Datetime.ParseDate(video.xpath(".//p[contains(@class,'ez-date')]/text()")[0]).date()
+
+		oc.add(VideoClipObject(
+			url = url,
+			title = title,
+			thumb = thumb, 
+			summary = summary, 
+			originally_available_at = originally_available_at
+		))
+
+	return oc
