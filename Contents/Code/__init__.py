@@ -17,7 +17,7 @@ def MainMenu():
         oc.add(DirectoryObject(key=Callback(FullEpisodes), title="Shows With Full Episodes", thumb=DEFAULT_THUMB, summary="Shows listed as having full episodes on Golf Channel site."))
         oc.add(DirectoryObject(key=Callback(FeaturedVideos), title="Featured Videos", thumb=DEFAULT_THUMB, summary="Videos featured on the Golf Channel website."))
         oc.add(DirectoryObject(key=Callback(LatestVideos, start=0), title="Latest Videos", thumb=DEFAULT_THUMB, summary="Latest videos posted on the Golf Channel website."))
-        oc.add(InputDirectoryObject(key = Callback(Search), title="Search Golfchannel Videos", prompt="Search Videos"))
+        oc.add(InputDirectoryObject(key = Callback(SearchVideos), title="Search Golfchannel Videos", prompt="Search Videos"))
         return oc
 
 ####################################################################################################
@@ -165,18 +165,13 @@ def GetVideos(url, show):
 	return oc
 
 ####################################################################################################
-@route("/video/golfchannel/search")
-def Search(query="golf"):
-	Log.Debug("Search Query: "+query)
-	return SearchVideos(query)
-	
-####################################################################################################
-@route("/video/golfchannel/searchvideos")
-def SearchVideos(query):
+@route("/video/golfchannel/searchvideos", start=int)
+def SearchVideos(query, start=1):
 	oc = ObjectContainer()
 	oc.title2 = "Search Golfchannel Videos"
 	
-	page = HTML.ElementFromURL("http://www.golfchannel.com/search/?&q=%s&submitSearch=+&mediatype=Video" % String.Quote(query, usePlus = True))
+	searchURL = "http://www.golfchannel.com/search/?&q=%s&submitSearch=+&mediatype=Video&start=%i" % (String.Quote(query, usePlus = True), start)
+	page = HTML.ElementFromURL(searchURL)
 	
 	for video in page.xpath("//li[contains(@class,'ez-Video')]"):
 		thumb = video.xpath(".//img/@src")[0]
@@ -192,5 +187,9 @@ def SearchVideos(query):
 			summary = summary, 
 			originally_available_at = originally_available_at
 		))
+
+	if start < 499 and len(oc) > 9:
+		oc.add(NextPageObject(key=Callback(SearchVideos, query=query, start=int(start+10)), title="Next Page"))
+
 
 	return oc
