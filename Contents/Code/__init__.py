@@ -17,7 +17,8 @@ def MainMenu():
         oc.add(DirectoryObject(key=Callback(FullEpisodes), title="Shows With Full Episodes", thumb=DEFAULT_THUMB, summary="Shows listed as having full episodes on Golf Channel site."))
         oc.add(DirectoryObject(key=Callback(FeaturedVideos), title="Featured Videos", thumb=DEFAULT_THUMB, summary="Videos featured on the Golf Channel website."))
         oc.add(DirectoryObject(key=Callback(LatestVideos, start=0), title="Latest Videos", thumb=DEFAULT_THUMB, summary="Latest videos posted on the Golf Channel website."))
-        oc.add(InputDirectoryObject(key = Callback(SearchVideos), title="Search Golfchannel Videos", prompt="Search Videos"))
+        oc.add(InputDirectoryObject(key = Callback(SearchVideos, sort="rel"), title="Search Videos by Relevance", prompt="Search Videos"))
+        oc.add(InputDirectoryObject(key = Callback(SearchVideos, sort="date"), title="Search Videos by Date", prompt="Search Videos"))
         return oc
 
 ####################################################################################################
@@ -166,11 +167,11 @@ def GetVideos(url, show):
 
 ####################################################################################################
 @route("/video/golfchannel/searchvideos", start=int)
-def SearchVideos(query, start=1):
+def SearchVideos(query, start=1, sort="rel"):
 	oc = ObjectContainer()
 	oc.title2 = "Search Golfchannel Videos"
 	
-	searchURL = "http://www.golfchannel.com/search/?&q=%s&submitSearch=+&mediatype=Video&start=%i" % (String.Quote(query, usePlus = True), start)
+	searchURL = "http://www.golfchannel.com/search/?&q=%s&submitSearch=+&mediatype=Video&start=%i&sort=%s" % (String.Quote(query, usePlus = True), start, sort)
 	page = HTML.ElementFromURL(searchURL)
 	
 	for video in page.xpath("//li[contains(@class,'ez-Video')]"):
